@@ -18,7 +18,7 @@ public struct Triple
 
 public class CvSystem : MonoBehaviour
 {
-    public CameraInput cameraInput;
+    //public CameraInput cameraInput;
     public int rotationBufferSize, positionBufferSize;
     public Triple leftHsvMin, leftHsvMax;
 
@@ -27,6 +27,11 @@ public class CvSystem : MonoBehaviour
     private InputBuffer<Vector3> positions;
     private Mat imgBgr, imgIn;
     private Hsv leftMarkerMin, leftMarkerMax;
+
+    public bool Brake { get; internal set; }
+    public bool Accelerate { get; internal set; }
+    public float SteeringAngle { get; internal set; }
+    public bool Hop { get; set; }
 
     void Start()
     {
@@ -64,12 +69,13 @@ public class CvSystem : MonoBehaviour
         CvInvoke.GaussianBlur(imgIn, imgIn, new Size(25, 25), 0);
 
         var rectangle = GetColorRectangle(leftMarkerMin, leftMarkerMax);
-
+        Accelerate = false;
+        Brake = false;
         if (rectangle.HasValue)
         {
             // Calculate new angle average
             float angle = rectangle.Value.Angle;
-            if (rectangle.Value.Size.Height < rectangle.Value.Size.Width)
+            if (rectangle.Value.Size.Height > rectangle.Value.Size.Width)
             {
                 angle += 90;
             }
@@ -78,15 +84,19 @@ public class CvSystem : MonoBehaviour
             foreach (var f in rotations.data)
                 angleAverage += f;
             angleAverage /= rotations.curLength;
+            SteeringAngle = angleAverage/90;
+            Vector3 currentCenter = new Vector2(rectangle.Value.Center.X, rectangle.Value.Center.Y);
 
+            positions.PushBack(currentCenter);
             // Calculate new delta-positions average
-            Vector3 centerDiffAverage = Vector3.zero;
-            for (int i = 0; i < positions.curLength - 1; i++)
-            {
-                centerDiffAverage += positions.data[i + 1] - positions.data[i];
-            }
-            centerDiffAverage /= (positions.curLength - 1); 
+            var pedal = (rectangle.Value.Size.Height + rectangle.Value.Size.Width);
+            Debug.Log(currentCenter + " " + SteeringAngle+ " " 
+                      + pedal);
+            Accelerate = (pedal < 160)? true : false ;
+            Brake = (pedal > 220 )? true:false ;
+           
         }
+
 
 
     }
@@ -128,12 +138,9 @@ public class CvSystem : MonoBehaviour
         if (contour.Size > 0)
         {
             var boundRec = CvInvoke.MinAreaRect(contour);
-            
             DrawPointsFRectangle(boundRec.GetVertices(), orangeMaybe.Mat);
-
-
             CvInvoke.Imshow("cam " + min.ToString(), orangeMaybe);
-            CvInvoke.WaitKey(60/24);
+            CvInvoke.WaitKey(24);
             return boundRec;
         }
 

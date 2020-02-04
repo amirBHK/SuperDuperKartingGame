@@ -7,6 +7,7 @@ namespace KartGame.KartSystems
     /// </summary>
     public class CameraInput : MonoBehaviour, IInput
     {
+        public CvSystem cvSystem;
         public float Acceleration
         {
             get { return m_Acceleration; }
@@ -43,16 +44,16 @@ namespace KartGame.KartSystems
 
         void Update ()
         {
-            if (Input.GetButton ("Brake"))
+            if (cvSystem.Brake)
                 m_Acceleration = -1f;
-            else if (Input.GetButton ("Accelerate"))
+            else if (cvSystem.Accelerate)
                 m_Acceleration = 1f;
             else
                 m_Acceleration = 0f;
 
-            m_Steering = Input.GetAxis ("Horizontal");
+            m_Steering = cvSystem.SteeringAngle;
 
-            m_HopHeld = Input.GetButton ("Hop");
+            m_HopHeld = cvSystem.Hop;
 
             if (m_FixedUpdateHappened)
             {
