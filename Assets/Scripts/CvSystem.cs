@@ -92,8 +92,8 @@ public class CvSystem : MonoBehaviour
             var pedal = (rectangle.Value.Size.Height + rectangle.Value.Size.Width);
             Debug.Log(currentCenter + " " + SteeringAngle+ " " 
                       + pedal);
-            Accelerate = (pedal < 160)? true : false ;
-            Brake = (pedal > 220 )? true:false ;
+            Accelerate = (pedal > 220)? true : false ;
+            Brake = (pedal < 160 )? true:false ;
            
         }
 
