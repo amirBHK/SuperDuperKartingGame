@@ -53,7 +53,7 @@ namespace KartGame.KartSystems
 
             m_Steering = cvSystem.SteeringAngle;
 
-            m_HopHeld = cvSystem.Hop;
+            m_HopHeld = cvSystem.HopHeld;
 
             if (m_FixedUpdateHappened)
             {
@@ -64,9 +64,9 @@ namespace KartGame.KartSystems
                 m_FirePressed = false;
             }
 
-            m_HopPressed |= Input.GetButtonDown ("Hop");
-            m_BoostPressed |= Input.GetButtonDown ("Boost");
-            m_FirePressed |= Input.GetButtonDown ("Fire");
+            m_HopPressed |= cvSystem.HopPressed;
+            //m_BoostPressed |= Input.GetButtonDown ("Boost");
+            //m_FirePressed |= Input.GetButtonDown ("Fire");
         }
 
         void FixedUpdate ()

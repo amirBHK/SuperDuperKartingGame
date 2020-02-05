@@ -21,17 +21,20 @@ public class CvSystem : MonoBehaviour
     //public CameraInput cameraInput;
     public int rotationBufferSize, positionBufferSize;
     public Triple leftHsvMin, leftHsvMax;
+    public Triple rightHsvMin, rightHsvMax;
 
     private VideoCapture webcam;
     private InputBuffer<float> rotations;
     private InputBuffer<Vector3> positions;
     private Mat imgBgr, imgIn;
     private Hsv leftMarkerMin, leftMarkerMax;
+    private Hsv rightMarkerMin, rightMarkerMax;
 
     public bool Brake { get; internal set; }
     public bool Accelerate { get; internal set; }
     public float SteeringAngle { get; internal set; }
-    public bool Hop { get; set; }
+    public bool HopHeld { get; set; }
+    public bool HopPressed { get; set; }
 
     void Start()
     {
@@ -47,7 +50,9 @@ public class CvSystem : MonoBehaviour
         positions = new InputBuffer<Vector3>(positionBufferSize);
 
         leftMarkerMin = MakeHsv(leftHsvMin);
+        rightMarkerMin = MakeHsv(rightHsvMin);
         leftMarkerMax = MakeHsv(leftHsvMax);
+        rightMarkerMax = MakeHsv(rightHsvMax);
 
         webcam.ImageGrabbed += Webcam_ImageGrabbed;
     }
@@ -66,11 +71,12 @@ public class CvSystem : MonoBehaviour
         imgIn = imgBgr.Clone();
 
         CvInvoke.CvtColor(imgIn, imgIn, ColorConversion.Bgr2Hsv);
-        CvInvoke.GaussianBlur(imgIn, imgIn, new Size(25, 25), 0);
+        CvInvoke.GaussianBlur(imgIn, imgIn, new Size(5, 5), 5, 5, BorderType.Reflect101); 
 
         var rectangle = GetColorRectangle(leftMarkerMin, leftMarkerMax);
-        Accelerate = false;
-        Brake = false;
+
+
+
         if (rectangle.HasValue)
         {
             // Calculate new angle average
@@ -94,10 +100,42 @@ public class CvSystem : MonoBehaviour
                       + pedal);
             Accelerate = (pedal > 220)? true : false ;
             Brake = (pedal < 160 )? true:false ;
-           
+            HopPressed = (currentCenter.y < 200 && !HopHeld) ? true : false;
+            HopHeld = (currentCenter.y < 200) ? true : false;
         }
+        else
+        {
+            Accelerate = false;
+            Brake = false;
+            HopHeld = false;
+            HopPressed = false;
+        }
+        //var rectangle2 = GetColorRectangle(rightMarkerMin, rightMarkerMax);
+        //if (rectangle2.HasValue)
+        //{
+        //    // Calculate new angle average
+        //    //float angle = rectangle.Value.Angle;
+        //    //if (rectangle.Value.Size.Height > rectangle.Value.Size.Width)
+        //    //{
+        //    //    angle += 90;
+        //    //}
+        //    //rotations.PushBack(angle);
+        //    //float angleAverage = 0.0f;
+        //    //foreach (var f in rotations.data)
+        //    //    angleAverage += f;
+        //    //angleAverage /= rotations.curLength;
+        //    //SteeringAngle = angleAverage / 90;
+        //    //Vector3 currentCenter = new Vector2(rectangle.Value.Center.X, rectangle.Value.Center.Y);
 
+        //    //positions.PushBack(currentCenter);
+        //    //// Calculate new delta-positions average
+        //    //var pedal = (rectangle.Value.Size.Height + rectangle.Value.Size.Width);
+        //    //Debug.Log(currentCenter + " " + SteeringAngle + " "
+        //    //          + pedal);
+        //    //Accelerate = (pedal > 220) ? true : false;
+        //    //Brake = (pedal < 160) ? true : false;
 
+        //}
 
     }
 
