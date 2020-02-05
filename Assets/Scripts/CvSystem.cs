@@ -18,6 +18,9 @@ public struct Triple
 
 public class CvSystem : MonoBehaviour
 {
+    public float AccelerateTr;
+    public float BrakeTr;
+    public float Hoptr;
     //public CameraInput cameraInput;
     public int rotationBufferSize, positionBufferSize;
     public Triple leftHsvMin, leftHsvMax;
@@ -30,11 +33,14 @@ public class CvSystem : MonoBehaviour
     private Hsv leftMarkerMin, leftMarkerMax;
     private Hsv rightMarkerMin, rightMarkerMax;
 
-    public bool Brake { get; internal set; }
-    public bool Accelerate { get; internal set; }
-    public float SteeringAngle { get; internal set; }
-    public bool HopHeld { get; set; }
-    public bool HopPressed { get; set; }
+    public bool Brake { get; private set; }
+    public bool Accelerate { get; private set; }
+    public float SteeringAngle { get; private set; }
+    public bool HopHeld { get; private set; }
+    public bool HopPressed { get; private set; }
+    public bool Boost { get; private set; }
+    public bool Fire { get; private set; }
+
 
     void Start()
     {
@@ -65,43 +71,57 @@ public class CvSystem : MonoBehaviour
     private void Webcam_ImageGrabbed(object sender, EventArgs e)
     {
         if (!webcam.IsOpened) return;
-
         imgBgr = new Mat();
         webcam.Retrieve(imgBgr);
         imgIn = imgBgr.Clone();
-
+        leftMarkerMin = MakeHsv(leftHsvMin);
+        rightMarkerMin = MakeHsv(rightHsvMin);
+        leftMarkerMax = MakeHsv(leftHsvMax);
+        rightMarkerMax = MakeHsv(rightHsvMax);
         CvInvoke.CvtColor(imgIn, imgIn, ColorConversion.Bgr2Hsv);
-        CvInvoke.GaussianBlur(imgIn, imgIn, new Size(5, 5), 5, 5, BorderType.Reflect101); 
-
-        var rectangle = GetColorRectangle(leftMarkerMin, leftMarkerMax);
-
-
-
-        if (rectangle.HasValue)
+        CvInvoke.GaussianBlur(imgIn, imgIn, new Size(5, 5),0); 
+        var rectangle = GetColorRectangle(leftMarkerMin, leftMarkerMax,0);
+        var rectangle2 = GetColorRectangle(rightMarkerMin, rightMarkerMax,1);
+        PointF cl, cr;       
+        if (rectangle.HasValue && rectangle2.HasValue)
         {
-            // Calculate new angle average
-            float angle = rectangle.Value.Angle;
-            if (rectangle.Value.Size.Height > rectangle.Value.Size.Width)
-            {
-                angle += 90;
-            }
-            rotations.PushBack(angle);
+            cl = rectangle.Value.Center;
+            cr = rectangle2.Value.Center;
+            float angle = Mathf.Atan2(cr.Y - cl.Y, cr.X - cl.X) * Mathf.Rad2Deg;
+             rotations.PushBack(angle);
             float angleAverage = 0.0f;
             foreach (var f in rotations.data)
                 angleAverage += f;
             angleAverage /= rotations.curLength;
-            SteeringAngle = angleAverage/90;
-            Vector3 currentCenter = new Vector2(rectangle.Value.Center.X, rectangle.Value.Center.Y);
+            SteeringAngle = angleAverage / 90;
 
-            positions.PushBack(currentCenter);
+            bool hopping = SteeringAngle > 1 || SteeringAngle < -1;
+            HopPressed = hopping && !HopHeld;
+            HopHeld = hopping;
+
             // Calculate new delta-positions average
-            var pedal = (rectangle.Value.Size.Height + rectangle.Value.Size.Width);
-            Debug.Log(currentCenter + " " + SteeringAngle+ " " 
-                      + pedal);
-            Accelerate = (pedal > 220)? true : false ;
-            Brake = (pedal < 160 )? true:false ;
-            HopPressed = (currentCenter.y < 200 && !HopHeld) ? true : false;
-            HopHeld = (currentCenter.y < 200) ? true : false;
+            Vector3 currentCenter = (new Vector2(cl.X, cl.Y) + new Vector2(cr.X, cr.Y))/2;
+            positions.PushBack(currentCenter);
+
+            PointF[] array1 = rectangle.Value.GetVertices();
+            PointF[] array2 = rectangle2.Value.GetVertices();
+            PointF[] newArray = new PointF[array1.Length + array2.Length];
+            Array.Copy(array1, newArray, array1.Length);
+            Array.Copy(array2, 0, newArray, array1.Length, array2.Length);
+
+            var boundRec = CvInvoke.MinAreaRect(newArray);
+            var pedal = (boundRec.Size.Height + boundRec.Size.Width);
+            Accelerate = (pedal > AccelerateTr)? true : false ;
+            Brake = (pedal < BrakeTr )? true:false ;
+            //HopPressed = (currentCenter.y < Hoptr && !HopHeld) ? true : false;
+            //HopHeld = (currentCenter.y < Hoptr) ? true : false;
+
+            Debug.Log( SteeringAngle + " " + pedal + " " + currentCenter.y);
+            
+
+            //DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);
+            //CvInvoke.Imshow("azeCam", imgBgr);
+            //CvInvoke.WaitKey(24);
         }
         else
         {
@@ -110,32 +130,7 @@ public class CvSystem : MonoBehaviour
             HopHeld = false;
             HopPressed = false;
         }
-        //var rectangle2 = GetColorRectangle(rightMarkerMin, rightMarkerMax);
-        //if (rectangle2.HasValue)
-        //{
-        //    // Calculate new angle average
-        //    //float angle = rectangle.Value.Angle;
-        //    //if (rectangle.Value.Size.Height > rectangle.Value.Size.Width)
-        //    //{
-        //    //    angle += 90;
-        //    //}
-        //    //rotations.PushBack(angle);
-        //    //float angleAverage = 0.0f;
-        //    //foreach (var f in rotations.data)
-        //    //    angleAverage += f;
-        //    //angleAverage /= rotations.curLength;
-        //    //SteeringAngle = angleAverage / 90;
-        //    //Vector3 currentCenter = new Vector2(rectangle.Value.Center.X, rectangle.Value.Center.Y);
-
-        //    //positions.PushBack(currentCenter);
-        //    //// Calculate new delta-positions average
-        //    //var pedal = (rectangle.Value.Size.Height + rectangle.Value.Size.Width);
-        //    //Debug.Log(currentCenter + " " + SteeringAngle + " "
-        //    //          + pedal);
-        //    //Accelerate = (pedal > 220) ? true : false;
-        //    //Brake = (pedal < 160) ? true : false;
-
-        //}
+        
 
     }
 
@@ -148,7 +143,7 @@ public class CvSystem : MonoBehaviour
         CvInvoke.Line(output, new Point((int)boundRecPoints[3].X, (int)boundRecPoints[3].Y), new Point((int)boundRecPoints[0].X, (int)boundRecPoints[0].Y), new MCvScalar(100, 0, 0), 3, (LineType)8, 0);
     }
 
-    private RotatedRect? GetColorRectangle(Hsv min, Hsv max)
+    private RotatedRect? GetColorRectangle(Hsv min, Hsv max,int index)
     {
         var orangeMaybe = imgIn.ToImage<Hsv, byte>().InRange(min, max);
 
@@ -177,8 +172,10 @@ public class CvSystem : MonoBehaviour
         {
             var boundRec = CvInvoke.MinAreaRect(contour);
             DrawPointsFRectangle(boundRec.GetVertices(), orangeMaybe.Mat);
-            CvInvoke.Imshow("cam " + min.ToString(), orangeMaybe);
-            CvInvoke.WaitKey(24);
+            //CvInvoke.Imshow("cam"+index, orangeMaybe);
+            //CvInvoke.WaitKey(24);
+
+
             return boundRec;
         }
 

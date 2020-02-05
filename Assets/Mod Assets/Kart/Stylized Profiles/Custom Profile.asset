@@ -18,6 +18,7 @@ MonoBehaviour:
   - {fileID: 114119196609133974}
   - {fileID: 114660337490018448}
   - {fileID: 114175933221421406}
+  - {fileID: 114704570044418246}
 --- !u!114 &114119196609133974
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -35,7 +36,7 @@ MonoBehaviour:
     overrideState: 1
     value: 1
   gradingMode:
-    overrideState: 0
+    overrideState: 1
     value: 1
   externalLut:
     overrideState: 0
@@ -1401,6 +1402,43 @@ MonoBehaviour:
   lumContrib:
     overrideState: 0
     value: 0.8
+--- !u!114 &114704570044418246
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a34fa72bd4185749832024e9c8010bf, type: 3}
+  m_Name: ScreenSpaceReflections
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  preset:
+    overrideState: 1
+    value: 4
+  maximumIterationCount:
+    overrideState: 0
+    value: 16
+  resolution:
+    overrideState: 0
+    value: 0
+  thickness:
+    overrideState: 0
+    value: 8
+  maximumMarchDistance:
+    overrideState: 0
+    value: 100
+  distanceFade:
+    overrideState: 0
+    value: 0.5
+  vignette:
+    overrideState: 0
+    value: 0.5
 --- !u!114 &114714704474358142
 MonoBehaviour:
   m_ObjectHideFlags: 3

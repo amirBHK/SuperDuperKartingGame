@@ -65,8 +65,8 @@ namespace KartGame.KartSystems
             }
 
             m_HopPressed |= cvSystem.HopPressed;
-            //m_BoostPressed |= Input.GetButtonDown ("Boost");
-            //m_FirePressed |= Input.GetButtonDown ("Fire");
+            m_BoostPressed |= cvSystem.Boost;
+            m_FirePressed |= cvSystem.Fire;
         }
 
         void FixedUpdate ()
