@@ -31,7 +31,7 @@ namespace KartGame.KartSystems
         SerializedProperty m_OnHopProp;
         SerializedProperty m_OnDriftStartedProp;
         SerializedProperty m_OnDriftStoppedProp;
-        SerializedProperty m_OnKartCollisionProp;
+        SerializedProperty m_OnKartCollisionProp ;
         
         GUIContent m_RaycastPositionsContent = new GUIContent ("Raycast Positions");
         GUIContent m_OtherSettingsContent = new GUIContent ("Other Settings", "These settings control how the kart behaves but are not part of its stat block.  It is recommended you don't adjust these without careful understanding of what they do.");

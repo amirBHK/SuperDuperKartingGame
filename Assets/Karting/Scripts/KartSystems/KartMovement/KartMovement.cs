@@ -69,7 +69,7 @@ namespace KartGame.KartSystems
         public UnityEvent OnHop;
         public UnityEvent OnDriftStarted;
         public UnityEvent OnDriftStopped;
-        public UnityEvent OnKartCollision;
+        [SerializeField] public UnityEvent OnKartCollision;
 
         IInput m_Input;
         Vector3 m_RigidbodyPosition;
@@ -573,6 +573,7 @@ namespace KartGame.KartSystems
 
             return penetrationOffset;
         }
+
 
         /// <summary>
         /// So that the velocity doesn't keep forcing a kart into a collider, the velocity is reduced by the penetrationOffset without flipping the direction of the velocity.

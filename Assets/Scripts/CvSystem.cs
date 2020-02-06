@@ -116,7 +116,7 @@ public class CvSystem : MonoBehaviour
             //HopPressed = (currentCenter.y < Hoptr && !HopHeld) ? true : false;
             //HopHeld = (currentCenter.y < Hoptr) ? true : false;
 
-            Debug.Log( SteeringAngle + " " + pedal + " " + currentCenter.y);
+          //  Debug.Log( SteeringAngle + " " + pedal + " " + currentCenter.y);
             
 
             //DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);

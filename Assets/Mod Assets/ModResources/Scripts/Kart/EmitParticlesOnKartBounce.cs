@@ -22,7 +22,7 @@ public class EmitParticlesOnKartBounce : MonoBehaviour
         kart.OnKartCollision.AddListener(KartCollision_OnExecute);
     }
 
-    void KartCollision_OnExecute() {
+    void KartCollision_OnExecute(/*RaycastHit ray*/) {
         p.Play();
     }
 

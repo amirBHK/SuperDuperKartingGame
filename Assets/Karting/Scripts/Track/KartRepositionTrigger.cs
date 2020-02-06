@@ -17,9 +17,9 @@ namespace KartGame.Track
         [Tooltip("A reference to the TrackManager script for this track.")]
         public TrackManager trackManager;
 
-        IMovable m_Movable;
+        protected IMovable m_Movable;
 
-        void Awake ()
+        protected void Awake ()
         {
             m_Movable = (IMovable)movable;
         }

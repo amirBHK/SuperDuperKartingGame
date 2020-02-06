@@ -150,6 +150,7 @@ namespace KartGame.Track
 
             TrackRecord.Save (m_HistoricalBestLap);
             TrackRecord.Save (m_HistoricalBestRace);
+            MenuManager.Instance.GoToMainMenu();
         }
 
         void CheckRacerHitCheckpoint (IRacer racer, Checkpoint checkpoint)

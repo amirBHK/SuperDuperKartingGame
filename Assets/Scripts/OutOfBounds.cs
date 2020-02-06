@@ -1,18 +1,33 @@
-﻿using System.Collections;
+﻿using KartGame.Track;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class OutOfBounds : MonoBehaviour
+public class OutOfBounds : KartRepositionTrigger
 {
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        
+        base.Awake();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnCollisionEnter(Collision collision)
     {
-        
+        Debug.Log("player out of bounds");
+        if (collision.gameObject == (movable as GameObject))
+        {
+            Debug.Log("player out of bounds");
+            trackManager.ReplaceMovable(m_Movable);
+        }
+    }
+
+
+    public void OnTouchGround(RaycastHit hit)
+    {
+        if (hit.transform.gameObject.layer == (LayerMask)9)
+        {
+            trackManager.ReplaceMovable(m_Movable);
+        }
+
     }
 }
