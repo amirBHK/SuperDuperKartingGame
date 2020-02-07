@@ -44,12 +44,15 @@ namespace KartGame.KartSystems
 
         void Update ()
         {
+            // if (cvSystem.Brake)
+            //     m_Acceleration = -1f;
+            // else if (cvSystem.Accelerate)
+            //     m_Acceleration = 1f;
+            // else
+            //     m_Acceleration = 0f;
             if (cvSystem.Brake)
                 m_Acceleration = -1f;
-            else if (cvSystem.Accelerate)
-                m_Acceleration = 1f;
-            else
-                m_Acceleration = 0f;
+            else m_Acceleration = cvSystem.Accelerate;
 
             m_Steering = cvSystem.SteeringAngle;
 
