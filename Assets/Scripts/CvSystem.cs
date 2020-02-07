@@ -171,7 +171,7 @@ public class CvSystem : MonoBehaviour
         if (contour.Size > 0)
         {
             var boundRec = CvInvoke.MinAreaRect(contour);
-            DrawPointsFRectangle(boundRec.GetVertices(), orangeMaybe.Mat);
+            //DrawPointsFRectangle(boundRec.GetVertices(), orangeMaybe.Mat);
             //CvInvoke.Imshow("cam"+index, orangeMaybe);
             //CvInvoke.WaitKey(24);
 
