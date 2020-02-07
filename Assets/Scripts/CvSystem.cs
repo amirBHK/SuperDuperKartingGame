@@ -41,7 +41,10 @@ public class CvSystem : MonoBehaviour {
     public bool Fire { get; private set; }
 
 
-    void Start() {
+    void Start()
+    {
+        AccelerateTr = PlayerPrefs.GetFloat("AccelerationTreshold", AccelerateTr);
+        BrakeTr = PlayerPrefs.GetFloat("BrakeTreshold", BrakeTr);
         webcam = new VideoCapture();
         webcam.FlipHorizontal = true;
         CvInvoke.CheckLibraryLoaded();

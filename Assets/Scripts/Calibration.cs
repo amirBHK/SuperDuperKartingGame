@@ -6,10 +6,13 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using UnityEngine;
 using KartGame.KartSystems;
+using UnityEngine.UI;
 
 
 public class Calibration : MonoBehaviour
 {
+    public RawImage cam;
+    private Texture2D texture;
     public float AccelerateTr;
     public float BrakeTr;
 
@@ -27,6 +30,7 @@ public class Calibration : MonoBehaviour
     private Hsv leftMarkerMin, leftMarkerMax;
     private Hsv rightMarkerMin, rightMarkerMax;
     private float range;
+    private float pedal;
 
     public bool Brake { get; private set; }
     public float Accelerate { get; private set; }
@@ -39,6 +43,7 @@ public class Calibration : MonoBehaviour
 
     void Start()
     {
+        
         webcam = new VideoCapture();
         webcam.FlipHorizontal = true;
         CvInvoke.CheckLibraryLoaded();
@@ -58,6 +63,10 @@ public class Calibration : MonoBehaviour
         rightMarkerMax = MakeHsv(rightHsvMax);
 
         webcam.ImageGrabbed += GrabHandler;
+        texture = new Texture2D(webcam.Width, webcam.Height, TextureFormat.RGBA32, false);
+
+        cam.texture = texture;
+        cam.rectTransform.sizeDelta = new Vector2(texture.width,texture.height);
     }
 
     private void LateUpdate()
@@ -112,26 +121,40 @@ public class Calibration : MonoBehaviour
             Array.Copy(array2, 0, newArray, array1.Length, array2.Length);
             var boundRec = CvInvoke.MinAreaRect(newArray);
 
-            var recSize = boundRec.Size.Height + boundRec.Size.Width;
-            var pedal = recSize - BrakeTr;
+            var recSize = boundRec.Size.Height + boundRec.Size.Width; 
+            pedal = recSize - BrakeTr;
 
             Brake = pedal < 0;
 
             Accelerate = pedal / range;
-
-            //DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);
+            DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);
+            cam.texture = Utils.ConvertMatToTex2D(imgBgr, texture, texture.width, texture.height);
             //CvInvoke.Imshow("azeCam", imgBgr);
             //CvInvoke.WaitKey(24);
         }
 
         else
         {
+            pedal = -Mathf.Infinity;
             Accelerate = 0;
             Brake = false;
             HopHeld = false;
             HopPressed = false;
         }
+        Debug.Log(pedal);
+        
     }
+
+
+    public void SetAccelerationTreshold()
+    {
+        PlayerPrefs.SetFloat("AccelerationTreshold", pedal);
+    }
+    public void SetBrakeTreshold()
+    {
+        PlayerPrefs.SetFloat("BrakeTreshold", pedal);
+    }
+    
 
     void DrawPointsFRectangle(PointF[] boundRecPoints, Mat output)
     {
