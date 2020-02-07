@@ -8,12 +8,8 @@ using UnityEngine;
 using KartGame.KartSystems;
 
 
-[Serializable]
-public struct Triple {
-    public double h, s, v;
-}
-
-public class CvSystem : MonoBehaviour {
+public class Calibration : MonoBehaviour
+{
     public float AccelerateTr;
     public float BrakeTr;
 
@@ -41,7 +37,8 @@ public class CvSystem : MonoBehaviour {
     public bool Fire { get; private set; }
 
 
-    void Start() {
+    void Start()
+    {
         webcam = new VideoCapture();
         webcam.FlipHorizontal = true;
         CvInvoke.CheckLibraryLoaded();
@@ -63,13 +60,15 @@ public class CvSystem : MonoBehaviour {
         webcam.ImageGrabbed += GrabHandler;
     }
 
-    private void LateUpdate() {
+    private void LateUpdate()
+    {
         if (webcam.IsOpened) webcam.Grab();
     }
 
-    private void GrabHandler(object sender, EventArgs e) {
+    private void GrabHandler(object sender, EventArgs e)
+    {
         if (!webcam.IsOpened) return;
-        
+
         imgBgr = new Mat();
         webcam.Retrieve(imgBgr);
         imgIn = imgBgr.Clone();
@@ -84,10 +83,11 @@ public class CvSystem : MonoBehaviour {
         var rectangle2 = GetColorRectangle(rightMarkerMin, rightMarkerMax, 1);
 
         PointF cl, cr;
-        if (rectangle.HasValue && rectangle2.HasValue) {
+        if (rectangle.HasValue && rectangle2.HasValue)
+        {
             cl = rectangle.Value.Center;
             cr = rectangle2.Value.Center;
-            
+
             // Calculate new angles average
             float angle = Mathf.Atan2(cr.Y - cl.Y, cr.X - cl.X) * Mathf.Rad2Deg;
             rotations.PushBack(angle);
@@ -111,10 +111,10 @@ public class CvSystem : MonoBehaviour {
             Array.Copy(array1, newArray, array1.Length);
             Array.Copy(array2, 0, newArray, array1.Length, array2.Length);
             var boundRec = CvInvoke.MinAreaRect(newArray);
-            
+
             var recSize = boundRec.Size.Height + boundRec.Size.Width;
             var pedal = recSize - BrakeTr;
-            
+
             Brake = pedal < 0;
 
             Accelerate = pedal / range;
@@ -124,7 +124,8 @@ public class CvSystem : MonoBehaviour {
             //CvInvoke.WaitKey(24);
         }
 
-        else {
+        else
+        {
             Accelerate = 0;
             Brake = false;
             HopHeld = false;
@@ -132,19 +133,21 @@ public class CvSystem : MonoBehaviour {
         }
     }
 
-    void DrawPointsFRectangle(PointF[] boundRecPoints, Mat output) {
+    void DrawPointsFRectangle(PointF[] boundRecPoints, Mat output)
+    {
         // Draw Bounding Rectangle from the first 4 points of "boundRecPoints" onto "output"
-        CvInvoke.Line(output, new Point((int) boundRecPoints[0].X, (int) boundRecPoints[0].Y), new Point((int) boundRecPoints[1].X, (int) boundRecPoints[1].Y),
-            new MCvScalar(100, 0, 0), 3, (LineType) 8, 0);
-        CvInvoke.Line(output, new Point((int) boundRecPoints[1].X, (int) boundRecPoints[1].Y), new Point((int) boundRecPoints[2].X, (int) boundRecPoints[2].Y),
-            new MCvScalar(100, 0, 0), 3, (LineType) 8, 0);
-        CvInvoke.Line(output, new Point((int) boundRecPoints[2].X, (int) boundRecPoints[2].Y), new Point((int) boundRecPoints[3].X, (int) boundRecPoints[3].Y),
-            new MCvScalar(100, 0, 0), 3, (LineType) 8, 0);
-        CvInvoke.Line(output, new Point((int) boundRecPoints[3].X, (int) boundRecPoints[3].Y), new Point((int) boundRecPoints[0].X, (int) boundRecPoints[0].Y),
-            new MCvScalar(100, 0, 0), 3, (LineType) 8, 0);
+        CvInvoke.Line(output, new Point((int)boundRecPoints[0].X, (int)boundRecPoints[0].Y), new Point((int)boundRecPoints[1].X, (int)boundRecPoints[1].Y),
+            new MCvScalar(100, 0, 0), 3, (LineType)8, 0);
+        CvInvoke.Line(output, new Point((int)boundRecPoints[1].X, (int)boundRecPoints[1].Y), new Point((int)boundRecPoints[2].X, (int)boundRecPoints[2].Y),
+            new MCvScalar(100, 0, 0), 3, (LineType)8, 0);
+        CvInvoke.Line(output, new Point((int)boundRecPoints[2].X, (int)boundRecPoints[2].Y), new Point((int)boundRecPoints[3].X, (int)boundRecPoints[3].Y),
+            new MCvScalar(100, 0, 0), 3, (LineType)8, 0);
+        CvInvoke.Line(output, new Point((int)boundRecPoints[3].X, (int)boundRecPoints[3].Y), new Point((int)boundRecPoints[0].X, (int)boundRecPoints[0].Y),
+            new MCvScalar(100, 0, 0), 3, (LineType)8, 0);
     }
 
-    private RotatedRect? GetColorRectangle(Hsv min, Hsv max, int index) {
+    private RotatedRect? GetColorRectangle(Hsv min, Hsv max, int index)
+    {
         var orangeMaybe = imgIn.ToImage<Hsv, byte>().InRange(min, max);
 
         int operationSize = 1;
@@ -159,28 +162,33 @@ public class CvSystem : MonoBehaviour {
         var hierarchy = new Mat();
         CvInvoke.FindContours(orangeMaybe, contours, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxNone);
         var biggestContourArea = 0.0;
-        for (int i = 0; i < contours.Size; i++) {
+        for (int i = 0; i < contours.Size; i++)
+        {
             double a = CvInvoke.ContourArea(contours[i], false);
-            if (a > biggestContourArea) {
+            if (a > biggestContourArea)
+            {
                 biggestContourArea = a;
                 contour = contours[i];
             }
         }
 
-        if (contour.Size > 0) {
+        if (contour.Size > 0)
+        {
             var boundRec = CvInvoke.MinAreaRect(contour);
-            
+
             return boundRec;
         }
 
         return null;
     }
 
-    private Hsv MakeHsv(Triple t) {
+    private Hsv MakeHsv(Triple t)
+    {
         return new Hsv(t.h / 2.0, t.s, t.v);
     }
 
-    private void OnDestroy() {
+    private void OnDestroy()
+    {
         webcam?.Dispose();
         CvInvoke.DestroyAllWindows();
     }
