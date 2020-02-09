@@ -39,4 +39,4 @@ Puis:
 
 ### Vidéo
 
-[![Vidéo](https://youtu.be/VHNzlEDG07Y)](https://youtu.be/VHNzlEDG07Y)
+[![Vidéo](https://img.youtube.com/vi/VHNzlEDG07Y/0.jpg)](https://youtu.be/VHNzlEDG07Y)
