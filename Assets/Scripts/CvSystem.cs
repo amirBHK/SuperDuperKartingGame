@@ -6,6 +6,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using UnityEngine;
 using KartGame.KartSystems;
+using UnityEngine.UI;
 
 
 [Serializable]
@@ -14,6 +15,8 @@ public struct Triple {
 }
 
 public class CvSystem : MonoBehaviour {
+    public RawImage cam;
+    private Texture2D texture;
     public float AccelerateTr;
     public float BrakeTr;
 
@@ -64,6 +67,10 @@ public class CvSystem : MonoBehaviour {
         rightMarkerMax = MakeHsv(rightHsvMax);
 
         webcam.ImageGrabbed += GrabHandler;
+        texture = new Texture2D(webcam.Width, webcam.Height, TextureFormat.RGBA32, false);
+
+        cam.texture = texture;
+        cam.rectTransform.sizeDelta = new Vector2(texture.width, texture.height);
     }
 
     private void LateUpdate() {
@@ -121,7 +128,13 @@ public class CvSystem : MonoBehaviour {
             Brake = pedal < 0;
 
             Accelerate = pedal / range;
-
+            if (cam != null)
+            {
+                DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);
+                CvInvoke.Line(imgBgr, new Point((int)rectangle.Value.Center.X, (int)rectangle.Value.Center.Y), new Point((int)rectangle2.Value.Center.X, (int)rectangle2.Value.Center.Y),
+                    new MCvScalar(0, 100, 0), 3, (LineType)8, 0);
+                cam.texture = Utils.ConvertMatToTex2D(imgBgr, texture, texture.width, texture.height); 
+            }
             //DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);
             //CvInvoke.Imshow("azeCam", imgBgr);
             //CvInvoke.WaitKey(24);
@@ -187,4 +200,5 @@ public class CvSystem : MonoBehaviour {
         webcam?.Dispose();
         CvInvoke.DestroyAllWindows();
     }
+    
 }

@@ -128,6 +128,8 @@ public class Calibration : MonoBehaviour
 
             Accelerate = pedal / range;
             DrawPointsFRectangle(boundRec.GetVertices(), imgBgr);
+            CvInvoke.Line(imgBgr,new Point( (int)rectangle.Value.Center.X, (int)rectangle.Value.Center.Y), new Point( (int)rectangle2.Value.Center.X, (int)rectangle2.Value.Center.Y), 
+                new MCvScalar(0, 100, 0), 3, (LineType)8, 0);
             cam.texture = Utils.ConvertMatToTex2D(imgBgr, texture, texture.width, texture.height);
             //CvInvoke.Imshow("azeCam", imgBgr);
             //CvInvoke.WaitKey(24);
@@ -141,7 +143,6 @@ public class Calibration : MonoBehaviour
             HopHeld = false;
             HopPressed = false;
         }
-        Debug.Log(pedal);
         
     }
 
@@ -198,7 +199,6 @@ public class Calibration : MonoBehaviour
         if (contour.Size > 0)
         {
             var boundRec = CvInvoke.MinAreaRect(contour);
-
             return boundRec;
         }
 
